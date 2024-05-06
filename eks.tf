@@ -2,33 +2,48 @@ provider "aws" {
   region = local.region
 }
 
+
 locals {
-  name   = "primary-cluster"
-  region = "us-east-1"
+  primary_name   = "primary-cluster"
+  primary_region = "us-east-1"
 
-  vpc_cidr = "10.123.0.0/16"
-  azs      = ["us-east-1a", "us-east-1b"]
+  primary_vpc_cidr = "10.123.0.0/16"
+  primary_azs      = ["us-east-1a", "us-east-1b"]
 
-  public_subnets  = ["10.123.1.0/24", "10.123.2.0/24"]
-  private_subnets = ["10.123.3.0/24", "10.123.4.0/24"]
-  intra_subnets   = ["10.123.5.0/24", "10.123.6.0/24"]
+  primary_public_subnets  = ["10.123.1.0/24", "10.123.2.0/24"]
+  primary_private_subnets = ["10.123.3.0/24", "10.123.4.0/24"]
+  primary_intra_subnets   = ["10.123.5.0/24", "10.123.6.0/24"]
 
-  tags = {
-    Example = local.name
+  primary_tags = {
+    Example = local.primary_name
+  }
+
+  secondary_name   = "secondary-cluster"
+  secondary_region = "us-east-1"
+
+  secondary_vpc_cidr = "10.124.0.0/16"
+  secondary_azs      = ["us-east-1a", "us-east-1b"]
+
+  secondary_public_subnets  = ["10.124.1.0/24", "10.124.2.0/24"]
+  secondary_private_subnets = ["10.124.3.0/24", "10.124.4.0/24"]
+  secondary_intra_subnets   = ["10.124.5.0/24", "10.124.6.0/24"]
+
+  secondary_tags = {
+    Example = local.secondary_name
   }
 }
 
-module "vpc" {
+module "primary_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 4.0"
 
-  name = local.name
-  cidr = local.vpc_cidr
+  name = local.primary_name
+  cidr = local.primary_vpc_cidr
 
-  azs             = local.azs
-  private_subnets = local.private_subnets
-  public_subnets  = local.public_subnets
-  intra_subnets   = local.intra_subnets
+  azs             = local.primary_azs
+  private_subnets = local.primary_private_subnets
+  public_subnets  = local.primary_public_subnets
+  intra_subnets   = local.primary_intra_subnets
 
   enable_nat_gateway = true
 
@@ -41,85 +56,29 @@ module "vpc" {
   }
 }
 
-module "eks" {
+module "primary_eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.5"
 
-  cluster_name                   = local.name
+  cluster_name                   = local.primary_name
   cluster_endpoint_public_access = true
 
-  cluster_addons = {
-    coredns = {
-      most_recent = true
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-  }
+  # Other configurations for primary EKS cluster...
 
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
-  control_plane_subnet_ids = module.vpc.intra_subnets
-
-  # EKS Managed Node Group(s)
-  eks_managed_node_group_defaults = {
-    ami_type       = "AL2_x86_64"
-    instance_types = ["t2.micro"]
-
-    attach_cluster_primary_security_group = true
-  }
-
-  eks_managed_node_groups = {
-    ascode-cluster-wg = {
-      min_size     = 1
-      max_size     = 2
-      desired_size = 1
-
-      instance_types = ["t2.micro"]
-      capacity_type  = "SPOT"
-
-      tags = {
-        ExtraTag = "helloworld"
-      }
-    }
-  }
-
-  tags = local.tags
+  tags = local.primary_tags
 }
 
-
-#create second cluster
-
-locals {
-  name   = "secondary-cluster"
-  region = "us-east-1"
-
-  vpc_cidr = "10.123.0.0/16"
-  azs      = ["us-east-1a", "us-east-1b"]
-
-  public_subnets  = ["10.123.3.0/24", "10.123.4.0/24"]
-  private_subnets = ["10.123.7.0/24", "10.123.8.0/24"]
-  intra_subnets   = ["10.123.9.0/24", "10.123.10.0/24"]
-
-  tags = {
-    Example = local.name
-  }
-}
-
-module "vpc" {
+module "secondary_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 4.0"
 
-  name = local.name
-  cidr = local.vpc_cidr
+  name = local.secondary_name
+  cidr = local.secondary_vpc_cidr
 
-  azs             = local.azs
-  private_subnets = local.private_subnets
-  public_subnets  = local.public_subnets
-  intra_subnets   = local.intra_subnets
+  azs             = local.secondary_azs
+  private_subnets = local.secondary_private_subnets
+  public_subnets  = local.secondary_public_subnets
+  intra_subnets   = local.secondary_intra_subnets
 
   enable_nat_gateway = true
 
@@ -132,52 +91,14 @@ module "vpc" {
   }
 }
 
-
-module "eks" {
+module "secondary_eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.8.5"
 
-  cluster_name                   = local.name
+  cluster_name                   = local.secondary_name
   cluster_endpoint_public_access = true
 
-  cluster_addons = {
-    coredns = {
-      most_recent = true
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      most_recent = true
-    }
-  }
+  # Other configurations for secondary EKS cluster...
 
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
-  control_plane_subnet_ids = module.vpc.intra_subnets
-
-  # EKS Managed Node Group(s)
-  eks_managed_node_group_defaults = {
-    ami_type       = "AL2_x86_64"
-    instance_types = ["t2.micro"]
-
-    attach_cluster_primary_security_group = true
-  }
-
-  eks_managed_node_groups = {
-    ascode-cluster-wg = {
-      min_size     = 1
-      max_size     = 2
-      desired_size = 1
-
-      instance_types = ["t2.micro"]
-      capacity_type  = "SPOT"
-
-      tags = {
-        ExtraTag = "helloworld"
-      }
-    }
-  }
-
-  tags = local.tags
+  tags = local.secondary_tags
 }
