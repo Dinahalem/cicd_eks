@@ -17,7 +17,7 @@ resource "random_string" "suffix" {
   special = false
 }
 
-module "vpc_cluster1" {
+module "vpc_cluster" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.7.0"
 
