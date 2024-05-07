@@ -15,7 +15,7 @@ module "eks_cluster1" {
 
   eks_managed_node_group_defaults = {
     ami_type               = "AL2_x86_64"
-    instance_types         = ["t3.micro"]
+    instance_types         = ["t2.micro"]
     vpc_security_group_ids = [aws_security_group.all_worker_mgmt.id]
   }
 
@@ -50,7 +50,7 @@ module "eks_cluster2" {
 
   eks_managed_node_group_defaults = {
     ami_type               = "AL2_x86_64"
-    instance_types         = ["t3.micro"]
+    instance_types         = ["t2.micro"]
     vpc_security_group_ids = [aws_security_group.all_worker_mgmt.id]
   }
 
