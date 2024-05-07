@@ -34,5 +34,5 @@ output "region" {
 }
 
 output "oidc_provider_arn" {
-  value = module.eks_cluster1.oidc_provider_arn  # Assuming both clusters have the same OIDC provider ARN
+  value = module.eks_cluster1.oidc_provider_arn  
 }
