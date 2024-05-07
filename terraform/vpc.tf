@@ -9,7 +9,7 @@ data "aws_availability_zones" "available" {}
 
 locals {
   cluster1_name = "primary-cluster"
-  cluster2_name = "secondary-cluster"
+  #cluster2_name = "secondary-cluster"
 }
 
 resource "random_string" "suffix" {
