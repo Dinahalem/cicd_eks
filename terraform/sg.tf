@@ -26,20 +26,3 @@ resource "aws_security_group_rule" "all_worker_mgmt_egress" {
   type              = "egress"
   cidr_blocks       = ["0.0.0.0/0"]
 }
-
-# Attach the same security group to both clusters
-resource "aws_eks_cluster" "cluster1" {
-  // Cluster 1 configuration
-  vpc_config {
-    // other configurations...
-    security_group_ids = [aws_security_group.all_worker_mgmt.id]
-  }
-}
-
-resource "aws_eks_cluster" "cluster2" {
-  // Cluster 2 configuration
-  vpc_config {
-    // other configurations...
-    security_group_ids = [aws_security_group.all_worker_mgmt.id]
-  }
-}
