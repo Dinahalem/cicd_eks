@@ -13,20 +13,6 @@ output "cluster1_security_group_id" {
   value       = module.eks_cluster1.cluster_security_group_id
 }
 
-output "cluster2_id" {
-  description = "EKS cluster ID for cluster 2."
-  value       = module.eks_cluster2.cluster_id
-}
-
-output "cluster2_endpoint" {
-  description = "Endpoint for EKS control plane for cluster 2."
-  value       = module.eks_cluster2.cluster_endpoint
-}
-
-output "cluster2_security_group_id" {
-  description = "Security group ids attached to the control plane for cluster 2."
-  value       = module.eks_cluster2.cluster_security_group_id
-}
 
 output "region" {
   description = "AWS region"
