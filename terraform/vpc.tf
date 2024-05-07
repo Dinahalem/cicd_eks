@@ -9,7 +9,8 @@ data "aws_availability_zones" "available" {}
 
 
 locals {
-  cluster_name = "primary-eks"
+  cluster1_name = "primary-cluster"
+  cluster2_name = "secondary-cluster"
 }
 
 resource "random_string" "suffix" {
@@ -17,7 +18,7 @@ resource "random_string" "suffix" {
   special = false
 }
 
-module "vpc" {
+module "vpc_cluster1" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.7.0"
 
@@ -32,16 +33,50 @@ module "vpc" {
   enable_dns_support   = true
 
   tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster1_name}" = "shared"
   }
 
   public_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster1_name}" = "shared"
     "kubernetes.io/role/elb"                      = "1"
   }
 
   private_subnet_tags = {
-    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/cluster/${local.cluster1_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = "1"
+  }
+}
+
+
+
+
+#cluster2
+
+module "vpc_cluster2" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.7.0"
+
+  name                 = "eks-vpc-cluster2"
+  cidr                 = "10.1.0.0/16"  # Adjust CIDR block as needed
+  azs                  = data.aws_availability_zones.available.names
+  private_subnets      = ["10.1.1.0/24", "10.1.2.0/24"]  
+  public_subnets       = ["10.1.4.0/24", "10.1.5.0/24"]
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
+  tags = {
+    "kubernetes.io/cluster/${local.cluster2_name}" = "shared"
+  }
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster2_name}" = "shared"
+    "kubernetes.io/role/elb"                      = "1"
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster2_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = "1"
   }
 }
