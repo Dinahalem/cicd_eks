@@ -8,6 +8,10 @@ ________________________________________________________________________________
 4. Aws CLI
 
 
-Part1:
-creating EC2 instance + deploying jenkins on it using terraform 
+Part-1:
+Creating EC2 instance + deploying jenkins on it using terraform 
+
+Part-2:
+1. Writing terraform code for creation of EKS cluster
+2. Pushing code to github repo
   
