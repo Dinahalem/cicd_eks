@@ -69,7 +69,7 @@ module "ec2_instance" {
 
   instance_type               = var.instance_type
   ami                         = data.aws_ami.example.id
-  key_name                    = "my-new-key"
+  key_name                    = "cicd-eks-server"
   monitoring                  = true
   vpc_security_group_ids      = [module.sg.security_group_id]
   subnet_id                   = module.vpc.public_subnets[0]
