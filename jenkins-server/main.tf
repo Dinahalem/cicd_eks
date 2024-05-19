@@ -59,3 +59,28 @@ module "sg" {
     Name = "jenkins_sg"
   }
 }
+
+#ec2
+
+module "ec2_instance" {
+  source = "terraform-aws-modules/ec2-instance/aws"
+
+  name = "jenkins_server"
+
+  instance_type               = var.instance_type
+  ami                         = data.aws_ami.example.id
+  key_name                    = "my-new-key"
+  monitoring                  = true
+  vpc_security_group_ids      = [module.sg.security_group_id]
+  subnet_id                   = module.vpc.public_subnets[0]
+  associate_public_ip_address = true
+  availability_zone           = data.aws_availability_zones.azs.names[0]
+  user_data                   = file("jenkins-install.sh")
+
+
+  tags = {
+    Name        = "jankins_server"
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}
