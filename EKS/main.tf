@@ -7,16 +7,23 @@ module "vpc" {
 
   azs            = data.aws_availability_zones.azs.names
   public_subnets = var.public_subnets
+  private_subnets = var.private_subnets
 
   enable_dns_hostnames    = true
+  enable_dns_gateway      = true
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "jenkins_vpc"
-    Terraform   = "true"
-    Environment = "dev"
+    "kubernetes.io/cluster/my-eks-cluster" = "shared"
   }
   public_subnet_tags = {
-    Name = "jenkins_subnet"
+    "kubernetes.io/cluster/my-eks-cluster" = "shared"
+    "kubernetes.io/role/elb"  
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/my-eks-cluster" = "shared"
+    "kubernetes.io/role/private_elb"       = 1
+
   }
 }
