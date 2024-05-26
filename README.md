@@ -11,6 +11,8 @@ Pre-requisites:
 
 Steps:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create access key and secret key
+
 Part-1:
 Creating EC2 instance + deploying jenkins on it using terraform 
 
